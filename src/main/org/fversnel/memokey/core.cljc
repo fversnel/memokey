@@ -21,7 +21,6 @@
   (let [memoize-bindings (or (:org.fversnel.memokey/memoize-bindings map-destructuring-arg)
                              (keys-arg->bindings map-destructuring-arg))
         map-destructuring-arg (dissoc map-destructuring-arg :org.fversnel.memokey/memoize-bindings)]
-    (println "argje:" map-destructuring-arg)
     `(let [mem# (atom {})]
        (fn [~map-destructuring-arg]
          (let [cache-key# ~memoize-bindings]
