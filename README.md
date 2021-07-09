@@ -70,6 +70,23 @@ Optionally we can provide a directive to memoize on a subset of the bindings:
   [b c])
 ```
 
+It works on all kinds of map destructuring:
+
+```clojure
+{;; regular non-namespaced keys
+ :keys [a]
+ ;; namespaced keys
+ :keys [:b/c]
+ ;; namespaced :a/keys
+ :a/keys [b]
+ ;; regular destructuring
+ e :d/e
+ ;; string based destructuring
+ :strs [some-string]
+ ;; symbol based destructuring
+ :syms [some-symbol]}
+```
+
 ## TODO
 
 - Provide different types of caches (supporting `clojure.core.cache`)
