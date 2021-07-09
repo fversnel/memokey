@@ -8,7 +8,7 @@ Add to deps.edn:
 
 ```clojure
 {org.fversnel/memokey {:git/url "https://github.com/fversnel/memokey"
-                       :sha "faf1e99b6b77344b69b85ed1609853b09cb70a1e"}}
+                       :sha "38ee41ebd7c635ffcdb5c884494666235fb9dd9e"}}
 ```
 
 Require the namespace:
