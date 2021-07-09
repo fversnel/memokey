@@ -8,7 +8,7 @@ Add to project.clj:
 
 ```clojure
 {org.fversnel/memokey {:git/url "https://github.com/fversnel/memokey"
-                       :sha "f87c37871d34e7a8e317b9dd0879a130772f1fa8"}
+                       :sha "6f6e34602e5f014a0228ff7aea7e95bd129c5a39"}
 ```
 
 Require the namespace:
