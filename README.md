@@ -4,7 +4,7 @@ Memoization for functions that use map destructuring for Clojure and Clojurescri
 
 ## Usage
 
-Add to project.clj:
+Add to deps.edn:
 
 ```clojure
 {org.fversnel/memokey {:git/url "https://github.com/fversnel/memokey"
