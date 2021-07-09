@@ -1,5 +1,5 @@
 (ns ^{:author "Frank Versnel"
-      :doc "Memoization for functions that use map destructuring"} 
+      :doc "Memoization for functions that use map destructuring"}
  org.fversnel.memokey)
 
 (defn map-destructuring-arg->bindings [map-destructuring-arg]
@@ -24,13 +24,15 @@
                              (map-destructuring-arg->bindings map-destructuring-arg))
         map-destructuring-arg (dissoc map-destructuring-arg ::memoize-bindings)]
     `(let [mem# (atom {})]
-       (fn [~map-destructuring-arg]
-         (let [cache-key# ~memoize-bindings]
-           (if-let [e# (find (deref mem#) cache-key#)]
-             (val e#)
-             (let [ret# (do ~@body)]
-               (swap! mem# assoc cache-key# ret#)
-               ret#)))))))
+       (with-meta
+         (fn [~map-destructuring-arg]
+           (let [cache-key# ~memoize-bindings]
+             (if-let [e# (find (deref mem#) cache-key#)]
+               (val e#)
+               (let [ret# (do ~@body)]
+                 (swap! mem# assoc cache-key# ret#)
+                 ret#))))
+         {::cache mem#}))))
 
 (comment
 
@@ -52,11 +54,11 @@
                      (identity b)))
 
   (def memo-example2 (m/memo-fn
-                     {:a/keys [b c]
-                      :org.fversnel.memokey/memoize-bindings [c]}
-                     (println "sleeping...")
-                     (Thread/sleep 5000)
-                     [b c]))
+                      {:a/keys [b c]
+                       :org.fversnel.memokey/memoize-bindings [c]}
+                      (println "sleeping...")
+                      (Thread/sleep 5000)
+                      [b c]))
 
   ;; end
   )
