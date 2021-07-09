@@ -2,6 +2,21 @@
 
 Memoization for functions that use map destructuring for Clojure and Clojurescript.
 
+## The map is Clojure's best datastructure
+
+Maps provide us with unordered and associative data.
+It's arguably the only data structure that we need to write
+function parameters. They compose terrifically and are extensible (using `merge` and namespaced keys) Ordered parameters are (often) just unjustified added complexity:
+
+```clojure
+(defn wrong [a b])
+
+(defn right [{:keys [a b]}])
+```
+
+Clojure's `memoize` only supports memoizing on the entire map being passed instead of just the keys that are being used.
+Memokey fixes this. Now you can use the power of maps combined with the performance benefits of memoization.
+
 ## Usage
 
 Add to deps.edn:
@@ -20,15 +35,29 @@ Require the namespace:
 Then write a function using the `memo-fn` macro:
 
 ```clojure
-(m/memo-fn
-  ;; map destructuring argument
-  {:a/keys [b]}
-  ;; function body
-  (Thread/sleep 5000)
-  (identity b))
+(def m
+  (m/memo-fn
+    ;; map destructuring argument
+    {:a/keys [b]}
+    ;; function body
+    (println "executing slow function")
+    (Thread/sleep 5000)
+    (identity b)))
+```
+When we call the memoized function it will only look at the elements
+of the map that are actually being destructured.
+When we call the function twice with the same value
+for `:a/b` regardless of the value of `:b/c` we get the memoized
+result back:
+
+
+```clojure
+(m {:a/b 42 :b/c 43}) ;; output: "executing slow function"; 42
+(m {:a/b 42 :b/c 44}) ;; output: 42
+
 ```
 
-Optionally provide a directive to memoize on a subset of the bindings:
+Optionally we can provide a directive to memoize on a subset of the bindings:
 
 
 ```clojure
@@ -36,6 +65,11 @@ Optionally provide a directive to memoize on a subset of the bindings:
   {:a/keys [b c]
   ;; Memoizes only on binding c
   :org.fversnel.memokey/memoize-bindings [c]}
+  (println "executing slow function")
   (Thread/sleep 5000)
   [b c])
 ```
+
+## TODO
+
+- Provide different types of caches (supporting `clojure.core.cache`)
