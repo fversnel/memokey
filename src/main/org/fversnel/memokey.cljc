@@ -1,4 +1,6 @@
-(ns org.fversnel.memokey.core)
+(ns ^{:author "Frank Versnel"
+      :doc "Memoization for functions that use map destructuring"} 
+ org.fversnel.memokey)
 
 (defn keys-arg->bindings [map-destructuring-arg]
   (into
@@ -18,9 +20,9 @@
    Optionally a :org.fversnel.memokey/memoize-bindings directive can be provided.
    This will override the memoization to use only the bindings provided in the directive."
   [map-destructuring-arg & body]
-  (let [memoize-bindings (or (:org.fversnel.memokey/memoize-bindings map-destructuring-arg)
+  (let [memoize-bindings (or (::memoize-bindings map-destructuring-arg)
                              (keys-arg->bindings map-destructuring-arg))
-        map-destructuring-arg (dissoc map-destructuring-arg :org.fversnel.memokey/memoize-bindings)]
+        map-destructuring-arg (dissoc map-destructuring-arg ::memoize-bindings)]
     `(let [mem# (atom {})]
        (fn [~map-destructuring-arg]
          (let [cache-key# ~memoize-bindings]
@@ -32,7 +34,7 @@
 
 (comment
 
-  (require :reload '[org.fversnel.memokey.core :as m])
+  (require :reload '[org.fversnel.memokey :as m])
 
   (m/keys-arg->bindings '{:a/keys [b] :keys [:b/c] e :d/e :strs [some-string] :syms [some-symbol]})
 
