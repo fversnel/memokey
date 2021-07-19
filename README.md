@@ -35,7 +35,7 @@ Require the namespace:
 Then write a function using the `memo-fn` macro:
 
 ```clojure
-(def m
+(def example-fn
   (m/memo-fn
     ;; map destructuring argument
     {:a/keys [b]}
@@ -44,6 +44,7 @@ Then write a function using the `memo-fn` macro:
     (Thread/sleep 5000)
     (identity b)))
 ```
+
 When we call the memoized function it will only look at the elements
 of the map that are actually being destructured.
 When we call the function twice with the same value
@@ -52,8 +53,8 @@ result back:
 
 
 ```clojure
-(m {:a/b 42 :b/c 43}) ;; output: "executing slow function"; 42
-(m {:a/b 42 :b/c 44}) ;; output: 42
+(example-fn {:a/b 42 :b/c 43}) ;; output: "executing slow function"; 42
+(example-fn {:a/b 42 :b/c 44}) ;; output: 42
 
 ```
 
@@ -68,6 +69,20 @@ Optionally we can provide a directive to memoize on a subset of the bindings:
   (println "executing slow function")
   (Thread/sleep 5000)
   [b c])
+```
+
+And provide a custom implementation of the org.fversnel.memokey.Cache protocol:
+
+*(by default memokey uses an `(atom {})` as its cache)*
+
+```clojure
+(m/memo-fn
+  {:a/keys [b]
+  ;; Custom cache:
+  :org.fversnel.memokey/cache (create-custom-cache)}
+  (println "executing slow function")
+  (Thread/sleep 5000)
+  (identity b))
 ```
 
 It works on all kinds of map destructuring:

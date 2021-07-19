@@ -2,6 +2,30 @@
       :doc "Memoization for functions that use map destructuring"}
  org.fversnel.memokey)
 
+(defprotocol Cache
+  (get-value [this key])
+  (put-value! [this key value])
+  (underlying [this]))
+
+(defrecord NoOpCache []
+  Cache
+  (get-value [_ _] nil)
+  (put-value! [_ _ _])
+  (underlying [this] this))
+
+(defn no-op-cache []
+  (NoOpCache.))
+
+(defn atom-cache []
+  (let [cache (atom {})]
+    (reify Cache
+      (get-value [_ key]
+        (get @cache key))
+      (put-value! [_ key value]
+        (swap! cache assoc key value))
+      (underlying [_]
+        cache))))
+
 (defn map-destructuring-arg->bindings [map-destructuring-arg]
   (into
    []
@@ -22,17 +46,20 @@
   [map-destructuring-arg & body]
   (let [memoize-bindings (or (::memoize-bindings map-destructuring-arg)
                              (map-destructuring-arg->bindings map-destructuring-arg))
-        map-destructuring-arg (dissoc map-destructuring-arg ::memoize-bindings)]
-    `(let [mem# (atom {})]
+        cache (or (::cache map-destructuring-arg)
+                  `(atom-cache))
+        map-destructuring-arg (dissoc map-destructuring-arg ::memoize-bindings ::cache)]
+    (println "cache: " cache)
+    `(let [cache# ~cache]
        (with-meta
          (fn [~map-destructuring-arg]
            (let [cache-key# ~memoize-bindings]
-             (if-let [e# (find (deref mem#) cache-key#)]
-               (val e#)
+             (if-let [e# (get-value cache# cache-key#)]
+               e#
                (let [ret# (do ~@body)]
-                 (swap! mem# assoc cache-key# ret#)
+                 (put-value! cache# cache-key# ret#)
                  ret#))))
-         {::cache mem#}))))
+         {::cache cache#}))))
 
 (comment
 
@@ -52,6 +79,8 @@
                      (println "sleeping...")
                      (Thread/sleep 5000)
                      (identity b)))
+  (memo-example {:a/b 42 :a/c 43})
+  (memo-example {:a/b 42 :a/c 44})
 
   (def memo-example2 (m/memo-fn
                       {:a/keys [b c]
@@ -59,6 +88,18 @@
                       (println "sleeping...")
                       (Thread/sleep 5000)
                       [b c]))
+  (memo-example2 {:a/b 42 :a/c 44})
+  (memo-example2 {:a/b 43 :a/c 44})
+
+  (def memo-example3 (m/memo-fn
+                      {:a/keys [b]
+                       :org.fversnel.memokey/cache (m/atom-cache)}
+                      (println "sleeping...")
+                      (Thread/sleep 5000)
+                      (identity b)))
+  (memo-example3 {:a/b 42 :a/c 43})
+  (memo-example3 {:a/b 42 :a/c 44})
+
 
   ;; end
   )
