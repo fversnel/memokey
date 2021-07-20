@@ -49,7 +49,6 @@
         cache (or (::cache map-destructuring-arg)
                   `(atom-cache))
         map-destructuring-arg (dissoc map-destructuring-arg ::memoize-bindings ::cache)]
-    (println "cache: " cache)
     `(let [cache# ~cache]
        (with-meta
          (fn [~map-destructuring-arg]
