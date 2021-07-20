@@ -59,7 +59,8 @@
                (let [ret# (do ~@body)]
                  (put-value! cache# cache-key# ret#)
                  ret#))))
-         {::cache cache#}))))
+         {::cache cache#
+          ::memoize-bindings '~memoize-bindings}))))
 
 (comment
 
@@ -73,6 +74,8 @@
      (println "sleeping...")
      (Thread/sleep 5000)
      (identity b)))
+  
+  (m/memo-fn {:keys [a]} a)
 
   (def memo-example (m/memo-fn
                      {:a/keys [b]}

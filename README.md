@@ -102,6 +102,15 @@ It works on all kinds of map destructuring:
  :syms [some-symbol]}
 ```
 
+Each memoized function contains the following meta data:
+
+```clojure
+(m/memo-fn {:keys [a]} a)
+
+=> #:org.fversnel.memokey{:memoize-bindings [a],
+                          :cache #object[org.fversnel.memokey$atom_cache$reify__470 0x144ab54 "org.fversnel.memokey$atom_cache$reify__470@144ab54"]}
+```
+
 ## TODO
 
 - Provide different types of caches (supporting `clojure.core.cache`)
