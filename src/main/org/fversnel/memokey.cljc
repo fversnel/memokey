@@ -52,7 +52,11 @@
     `(let [cache# ~cache]
        (with-meta
          (fn [~map-destructuring-arg]
-           (let [cache-key# ~memoize-bindings]
+                            ;; optimize if there is only one binding
+                            ;; we don't need to wrap the binding in a vector     
+           (let [cache-key# ~(if (= (count memoize-bindings) 1)
+                               (first memoize-bindings)
+                               memoize-bindings)]
              (if-let [e# (get-value cache# cache-key#)]
                e#
                (let [ret# (do ~@body)]
