@@ -41,29 +41,41 @@
   "Memoizes the given function on the keys in the destructured map.
    This is useful if you want to memoize a function based on a subset of a map.
    
-   Optionally a :org.fversnel.memokey/memoize-bindings directive can be provided.
-   This will override the memoization to use only the bindings provided in the directive."
+   Optionally:
+   - a :org.fversnel.memokey/memoize-bindings directive will override the memoization 
+   to use only the bindings provided in the directive.
+   - a :org.fversnel.memokey/memoize? directive with the value `false` will disable
+   memoization alltogether
+   - a :org.fversnel.memokey/cache directive will provide the function with a custom
+   cache implementation. By default `atom-cache` is used."
   [map-destructuring-arg & body]
-  (let [memoize-bindings (or (::memoize-bindings map-destructuring-arg)
-                             (map-destructuring-arg->bindings map-destructuring-arg))
-        cache (or (::cache map-destructuring-arg)
-                  `(atom-cache))
-        map-destructuring-arg (dissoc map-destructuring-arg ::memoize-bindings ::cache)]
-    `(let [cache# ~cache]
-       (with-meta
-         (fn [~map-destructuring-arg]
+  (let [custom-memoize-bindings (::memoize-bindings map-destructuring-arg)
+        cache (get map-destructuring-arg ::cache `(atom-cache))
+        memoize? (get map-destructuring-arg ::memoize? true)
+
+        map-destructuring-arg (dissoc map-destructuring-arg ::memoize? ::memoize-bindings ::cache)
+
+        memoize-bindings (or custom-memoize-bindings
+                             (map-destructuring-arg->bindings map-destructuring-arg))]
+    (if memoize?
+      `(let [cache# ~cache]
+         (with-meta
+           (fn [~map-destructuring-arg]
                             ;; optimize if there is only one binding
                             ;; we don't need to wrap the binding in a vector     
-           (let [cache-key# ~(if (= (count memoize-bindings) 1)
-                               (first memoize-bindings)
-                               memoize-bindings)]
-             (if-let [e# (get-value cache# cache-key#)]
-               e#
-               (let [ret# (do ~@body)]
-                 (put-value! cache# cache-key# ret#)
-                 ret#))))
-         {::cache cache#
-          ::memoize-bindings '~memoize-bindings}))))
+             (let [cache-key# ~(if (= (count memoize-bindings) 1)
+                                 (first memoize-bindings)
+                                 memoize-bindings)]
+               (if-let [e# (get-value cache# cache-key#)]
+                 e#
+                 (let [ret# (do ~@body)]
+                   (put-value! cache# cache-key# ret#)
+                   ret#))))
+           {::cache cache#
+            ::memoize-bindings '~memoize-bindings}))
+
+      ;; else
+      `(fn [~map-destructuring-arg] ~@body))))
 
 (comment
 
@@ -77,7 +89,7 @@
      (println "sleeping...")
      (Thread/sleep 5000)
      (identity b)))
-  
+
   (m/memo-fn {:keys [a]} a)
 
   (def memo-example (m/memo-fn

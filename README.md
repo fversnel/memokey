@@ -111,6 +111,12 @@ Each memoized function contains the following meta data:
                           :cache #object[org.fversnel.memokey$atom_cache$reify__470 0x144ab54 "org.fversnel.memokey$atom_cache$reify__470@144ab54"]}
 ```
 
+To turn off memoization all together (without any overhead):
+
+```clojure
+(m/memo-fn {:keys [a] :org.fversnel.memokey/memoize? false} a)
+```
+
 ## TODO
 
 - Provide different types of caches (supporting `clojure.core.cache`)
