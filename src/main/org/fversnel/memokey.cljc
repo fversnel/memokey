@@ -13,8 +13,7 @@
   (put-value! [_ _ _])
   (underlying [this] this))
 
-(defn no-op-cache []
-  (NoOpCache.))
+(def no-op-cache (NoOpCache.))
 
 (defn atom-cache []
   (let [cache (atom {})]
