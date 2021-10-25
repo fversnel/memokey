@@ -23,7 +23,7 @@ Add to deps.edn:
 
 ```clojure
 {org.fversnel/memokey {:git/url "https://github.com/fversnel/memokey"
-                       :sha "78005abc698cde89968c65c4305006c2a2e9f97e"}}
+                       :sha "633146f44af2eb4b61524f88bdf2e28a3843858d"}}
 ```
 
 Require the namespace:
