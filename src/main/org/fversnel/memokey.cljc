@@ -7,14 +7,6 @@
   (put-value! [this key value])
   (underlying [this]))
 
-(defrecord NoOpCache []
-  Cache
-  (get-value [_ _] nil)
-  (put-value! [_ _ _])
-  (underlying [this] this))
-
-(def no-op-cache (NoOpCache.))
-
 (defn atom-cache []
   (let [cache (atom {})]
     (reify Cache
